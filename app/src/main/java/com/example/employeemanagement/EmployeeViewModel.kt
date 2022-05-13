@@ -10,7 +10,7 @@ class EmployeeViewModel:ViewModel() {
         AUTHENTICATED, UNAUTHENTICATED
     }
     val fireAuth = FirebaseAuth.getInstance()
-    val user: FirebaseUser? = fireAuth.currentUser
+    var user: FirebaseUser? = fireAuth.currentUser
 
     val authLD : MutableLiveData<Auth> = MutableLiveData()
     val errorMsgLD : MutableLiveData<String> = MutableLiveData()
@@ -21,8 +21,29 @@ class EmployeeViewModel:ViewModel() {
         }
         else{
             authLD.value = Auth.UNAUTHENTICATED
+
         }
     }
+
+    fun login(email:String,password:String){
+        fireAuth.signInWithEmailAndPassword(email,password)
+            .addOnCompleteListener{
+                if (it.isSuccessful){
+                    authLD.value = Auth.AUTHENTICATED
+                    user = fireAuth.currentUser
+                }
+            }
+            .addOnFailureListener{
+                errorMsgLD.value = it.localizedMessage
+            }
+    }
+    fun logout(){
+        if (user != null){
+            fireAuth.signOut()
+            authLD.value = Auth.UNAUTHENTICATED
+        }
+    }
+
 
 
 }
